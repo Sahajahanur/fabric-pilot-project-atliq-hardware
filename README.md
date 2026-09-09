@@ -24,7 +24,10 @@
 
 ## 🧭 Overview
 
-AtliQ Hardware — a consumer electronics and computer hardware manufacturer operating across APAC, EU, and NA/LATAM — ran its BI reporting directly off an on-prem MySQL database and disconnected Excel files, with zero visibility into external 3PL delivery performance. This project re-platforms that stack onto **Microsoft Fabric**, using a medallion Lakehouse (Bronze → Silver), Dataflow Gen2 transformations, an On-Premises Data Gateway, and a governed Power BI semantic model — all orchestrated by a single scheduled pipeline with failure alerts.
+- **AtliQ Hardware** is a consumer electronics and hardware manufacturer operating across APAC, EU, and NA/LATAM.
+- BI reporting ran directly off an on-prem MySQL database plus disconnected Excel files — with **zero visibility** into external 3PL delivery performance.
+- This project re-platforms that stack onto **Microsoft Fabric**: a medallion Lakehouse (Bronze → Silver), Dataflow Gen2 transformations, an On-Premises Data Gateway, and a governed Power BI semantic model.
+- The whole flow is orchestrated by **one scheduled pipeline with failure alerts** — no manual refreshes.
 
 📄 Full technical write-up: [`Fabric_Pilot_Project_Report.pdf`](./Fabric_Pilot_Project_Report.pdf)
 
@@ -32,9 +35,22 @@ AtliQ Hardware — a consumer electronics and computer hardware manufacturer ope
 
 ## 🎯 Business Problem
 
-- **What problem?** Power BI dashboards refreshed directly against a 1.85M+ row on-prem MySQL database, causing gateway timeouts and local memory freezes (~12–15 min refresh, frequent failures). Meanwhile, three 3PL logistics partners (Kuehne+Nagel, UPS, XPO) sent raw JSON delivery payloads that were never parsed — leaving delivery delays, freight variance, and SLA/OTIF performance completely invisible. Planning data (targets, opex, market share) was scattered across disconnected Excel sheets with no single source of truth.
-- **Who was affected?** Supply chain and executive stakeholders who needed a combined view of sales performance *and* delivery reliability; analysts who lost time to failed refreshes; data governance was effectively non-existent across departments.
-- **Why did it matter?** Without a unified, governed analytical layer, management could not see delivery SLA risk, could not trust cross-department metric definitions, and was bottlenecked by an operational database that wasn't built for BI workloads.
+**What problem?**
+- Power BI dashboards refreshed directly against 1.85M+ rows in on-prem MySQL.
+- This caused gateway timeouts, local memory freezes, and ~12–15 min refresh times.
+- Three 3PL partners (Kuehne+Nagel, UPS, XPO) sent raw JSON payloads that were never parsed.
+- Delivery delays, freight variance, and SLA/OTIF performance were completely invisible.
+- Planning data (targets, opex, market share) sat scattered across disconnected Excel sheets.
+
+**Who was affected?**
+- Supply chain and executive stakeholders needing a combined sales + delivery view.
+- Analysts losing time to failed refreshes.
+- The business as a whole — data governance was effectively non-existent.
+
+**Why did it matter?**
+- Management couldn't see delivery SLA risk in one place.
+- Departments trusted different, conflicting metric definitions.
+- The operational database was a bottleneck it was never designed to be.
 
 <img src="assets/OLD_BI_360_TO_FABRIC.png" alt="Before: local MySQL-driven BI 360 report" width="700"/>
 
