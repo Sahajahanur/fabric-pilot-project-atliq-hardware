@@ -159,18 +159,40 @@ This is a Microsoft Fabric project — there's no local code to execute, but the
 
 ## 💡 Insights
 
-- **3PL visibility was a true blind spot, not just a slow report** — 0% of delivery/SLA data was usable pre-project; once flattened, `orders_3pl_na` revealed On-Time-In-Full (OTIF) performance varying sharply by carrier and customer segment (visible in the NA Supply Chain view: Forecast Accuracy 77%, Net Error 986.2K).
-- **Row-count divergence across layers reflects real data-quality gating, not a bug** — 560 raw Bronze rows → 370 rows in the final model, after filtering out unconfirmed/test tracking records and enforcing referential integrity against `dim_customer`. This is itself a governance insight: nearly 1 in 3 raw delivery records weren't analytics-ready.
-- **The refresh bottleneck was architectural, not just a bigger-VM problem** — moving analytical compute off the OLTP MySQL instance (rather than scaling the local server) is what actually removed the gateway timeouts, since the contention was between reporting queries and production writes.
+- **3PL visibility was a true blind spot, not just a slow report.**
+  - 0% of delivery/SLA data was usable before this project — raw JSON sat unparsed.
+  - Once flattened, `orders_3pl_na` exposed OTIF performance varying sharply by carrier and customer segment.
+  - NA Supply Chain view now shows Forecast Accuracy 77%, Net Error 986.2K in one place.
+
+- **Row-count divergence across layers reflects data-quality gating, not a bug.**
+  - 560 raw Bronze rows → 370 rows in the final semantic model.
+  - The drop comes from filtering unconfirmed/test tracking records and enforcing referential integrity against `dim_customer`.
+  - Nearly 1 in 3 raw delivery records weren't analytics-ready — a governance finding in its own right.
+
+- **The refresh bottleneck was architectural, not a bigger-VM problem.**
+  - Local MySQL refreshes were timing out due to contention with production writes, not just row volume.
+  - Moving analytical compute off the OLTP instance (into the Lakehouse) is what actually fixed it.
 
 ---
 
 ## ✅ Recommendations / Actions
 
-- **Adopt the medallion pattern org-wide** for any future external-partner data feed (not just 3PL) — Bronze landing + Dataflow Gen2 standardization is now a repeatable pattern rather than a one-off script.
-- **Formalize referential-integrity checks** (the `dim_customer` match used to go from 560 → 370 rows) as a standard Silver-layer gate before any fact table reaches the semantic model, so "raw ingested" and "analytics-ready" counts are never confused again.
-- **Extend the alerting pattern** (Teams/Outlook on pipeline failure) to all production refreshes, not just this pilot, so refresh failures are caught the same day instead of surfacing as a stale dashboard days later.
-- **Roll the pilot out beyond NA** to the EU and APAC 3PL partners once the schema-standardization pattern proves stable.
+- **Adopt the medallion pattern org-wide.**
+  - Applies to any future external-partner feed, not just 3PL.
+  - Bronze landing + Dataflow Gen2 standardization is now a repeatable pattern, not a one-off script.
+
+- **Formalize referential-integrity checks as a standard Silver-layer gate.**
+  - Use the same `dim_customer` match that took 560 → 370 rows.
+  - Apply it before any fact table reaches the semantic model.
+  - Keeps "raw ingested" and "analytics-ready" counts from ever being confused again.
+
+- **Extend the alerting pattern to all production refreshes.**
+  - Currently Teams/Outlook alerts only cover this pilot's pipeline.
+  - Rolling it out further catches refresh failures the same day, not days later as a stale dashboard.
+
+- **Roll the pilot out beyond NA.**
+  - Extend 3PL ingestion to EU and APAC carriers.
+  - Do this once the schema-standardization pattern proves stable in production.
 
 ---
 
